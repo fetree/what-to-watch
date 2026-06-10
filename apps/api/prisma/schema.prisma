@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String   @id @default(uuid())
+  email            String   @unique
+  tasteProfileText String?
+  qdrantPointId    String?
+  createdAt        DateTime @default(now())
+  ratings          Rating[]
+}
+
+model Rating {
+  id        String   @id @default(uuid())
+  userId    String
+  tmdbId    Int
+  title     String
+  mediaType String
+  score     Int
+  ratedAt   DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, tmdbId])
+}
+
+model CatalogItem {
+  id            String   @id @default(uuid())
+  tmdbId        Int      @unique
+  title         String
+  mediaType     String
+  overview      String
+  genres        String
+  posterPath    String?
+  qdrantPointId String?
+  createdAt     DateTime @default(now())
+}

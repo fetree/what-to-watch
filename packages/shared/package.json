@@ -1,0 +1,11 @@
+{
+  "name": "@what-to-watch/shared",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "zod": "^3.22.0"
+  }
+}
