@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { PosterCard } from "../components/PosterCard.js";
+import { Navbar } from "../components/Navbar.js";
 import { createUser, getSeedTitles, saveRating } from "../api/client.js";
 import { getUserId, setUserId, setEmail } from "../store/user.js";
 import type { SeedTitle } from "@what-to-watch/shared";
@@ -71,48 +72,68 @@ export function Onboarding() {
 
   if (!userId) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4">
-        <div className="w-full max-w-sm">
-          <h1 className="text-3xl font-bold text-white mb-2">What to Watch</h1>
-          <p className="text-zinc-400 mb-8">
-            Rate a few titles and we'll build your personal taste profile.
-          </p>
-          <form onSubmit={handleEmailSubmit} className="flex flex-col gap-4">
-            <input
-              type="email"
-              required
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmailState(e.target.value)}
-              className="bg-zinc-800 text-white placeholder-zinc-500 border border-zinc-700 rounded-lg px-4 py-3 focus:outline-none focus:border-zinc-400"
-            />
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-white text-zinc-900 font-semibold rounded-lg py-3 hover:bg-zinc-100 disabled:opacity-50 transition-colors"
-            >
-              {loading ? "Setting up…" : "Get started"}
-            </button>
-          </form>
+      <div className="min-h-screen bg-zinc-950 flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="w-full max-w-sm">
+            <h1 className="text-2xl font-semibold text-white mb-1">Find your next watch</h1>
+            <p className="text-zinc-500 text-sm mb-8">
+              Rate a few titles and we'll build a taste profile just for you.
+            </p>
+            <form onSubmit={handleEmailSubmit} className="flex flex-col gap-3">
+              <input
+                type="email"
+                required
+                placeholder="your@email.com"
+                value={email}
+                onChange={(e) => setEmailState(e.target.value)}
+                className="bg-zinc-900 text-white placeholder-zinc-600 border border-zinc-800 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-zinc-600 transition-colors"
+              />
+              {error && <p className="text-red-400 text-xs">{error}</p>}
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-white text-zinc-900 font-medium rounded-lg py-3 text-sm hover:bg-zinc-100 disabled:opacity-50 transition-colors"
+              >
+                {loading ? "Setting up…" : "Get started"}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     );
   }
 
   const ratedCount = Object.keys(ratings).length;
+  const total = titles.length;
 
   return (
-    <div className="min-h-screen bg-zinc-900 px-4 py-10">
-      <div className="max-w-5xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white">Rate what you know</h1>
-          <p className="text-zinc-400 mt-1">
-            Rate {titles.length} titles — the more you rate, the better your recommendations.
-          </p>
-          <p className="text-zinc-500 text-sm mt-1">{ratedCount} rated</p>
+    <div className="min-h-screen bg-zinc-950">
+      <Navbar />
+
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        <div className="mb-6 flex items-end justify-between">
+          <div>
+            <h1 className="text-xl font-semibold text-white">Rate what you know</h1>
+            <p className="text-zinc-500 text-sm mt-1">
+              The more you rate, the better your recommendations.
+            </p>
+          </div>
+          <div className="text-right shrink-0 ml-4">
+            <span className="text-white font-medium tabular-nums">{ratedCount}</span>
+            <span className="text-zinc-600 text-sm"> / {total}</span>
+          </div>
         </div>
-        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4">
+
+        {/* Progress bar */}
+        <div className="w-full h-0.5 bg-zinc-800 rounded-full mb-8">
+          <div
+            className="h-0.5 bg-white rounded-full transition-all duration-300"
+            style={{ width: total ? `${(ratedCount / total) * 100}%` : "0%" }}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-8">
           {titles.map((title) => (
             <PosterCard
               key={title.tmdbId}
@@ -122,17 +143,22 @@ export function Onboarding() {
             />
           ))}
         </div>
-        {error && <p className="text-red-400 text-sm mt-6">{error}</p>}
-        <div className="mt-8 flex justify-end">
+
+        {error && <p className="text-red-400 text-xs mt-6">{error}</p>}
+
+        <div className="mt-8 flex items-center justify-between">
+          <p className="text-zinc-600 text-xs">
+            {ratedCount < 5 ? `Rate ${5 - ratedCount} more to continue` : "Ready to go!"}
+          </p>
           <button
             onClick={handleSubmit}
             disabled={loading || ratedCount < 5}
-            className="bg-white text-zinc-900 font-semibold rounded-lg px-8 py-3 hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="bg-white text-zinc-900 font-medium rounded-lg px-6 py-2.5 text-sm hover:bg-zinc-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
-            {loading ? "Saving…" : `Build my taste profile →`}
+            {loading ? "Saving…" : "Build my profile →"}
           </button>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

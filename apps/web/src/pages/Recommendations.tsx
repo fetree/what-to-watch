@@ -1,8 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { BlurbCard } from "../components/BlurbCard.js";
+import { Navbar } from "../components/Navbar.js";
 import { getRecommendations } from "../api/client.js";
 import { getUserId } from "../store/user.js";
+import {
+  getCachedRecommendations,
+  setCachedRecommendations,
+  clearCachedRecommendations,
+} from "../store/recommendations.js";
 import type { RecommendationItem } from "@what-to-watch/shared";
 
 export function Recommendations() {
@@ -13,39 +19,68 @@ export function Recommendations() {
 
   const [items, setItems] = useState<RecommendationItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchRecommendations = useCallback(
+    async (bustCache = false) => {
+      if (!userId) {
+        navigate("/");
+        return;
+      }
+
+      if (!bustCache) {
+        const cached = getCachedRecommendations();
+        if (cached) {
+          setItems(cached);
+          setLoading(false);
+          return;
+        }
+      }
+
+      try {
+        const r = await getRecommendations(userId);
+        setCachedRecommendations(r.recommendations);
+        setItems(r.recommendations);
+      } catch (e: unknown) {
+        setError((e as Error).message);
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [userId, navigate],
+  );
+
   useEffect(() => {
-    if (!userId) {
-      navigate("/");
-      return;
-    }
-    getRecommendations(userId)
-      .then((r) => setItems(r.recommendations))
-      .catch((e: unknown) => setError((e as Error).message))
-      .finally(() => setLoading(false));
-  }, [userId, navigate]);
+    fetchRecommendations();
+  }, [fetchRecommendations]);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    clearCachedRecommendations();
+    await fetchRecommendations(true);
+  }
 
   async function handleFeedback(tmdbId: number) {
-    setItems((prev) => prev.filter((i) => i.tmdbId !== tmdbId));
+    const updated = items.filter((i) => i.tmdbId !== tmdbId);
+    setItems(updated);
+    setCachedRecommendations(updated);
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-zinc-600 border-t-white rounded-full animate-spin" />
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-zinc-700 border-t-zinc-300 rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex flex-col items-center justify-center gap-4 p-4">
-        <p className="text-red-400">{error}</p>
-        <button
-          onClick={() => navigate("/")}
-          className="text-zinc-400 underline text-sm"
-        >
+      <div className="min-h-screen bg-zinc-950 flex flex-col items-center justify-center gap-3 p-4">
+        <p className="text-red-400 text-sm">{error}</p>
+        <button onClick={() => navigate("/")} className="text-zinc-500 text-sm underline">
           Start over
         </button>
       </div>
@@ -53,15 +88,18 @@ export function Recommendations() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-900 px-4 py-10">
-      <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-white">Your picks</h1>
-          <p className="text-zinc-400 mt-1 text-sm">
-            Curated for your taste. Hit ✕ on anything that doesn't fit — your profile updates in real time.
+    <div className="min-h-screen bg-zinc-950">
+      <Navbar onRefresh={handleRefresh} refreshing={refreshing} />
+
+      <main className="max-w-2xl mx-auto px-4 py-8">
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold text-white">Your picks</h1>
+          <p className="text-zinc-500 text-sm mt-1">
+            Hit ✕ on anything that doesn't fit — your profile updates in real time.
           </p>
         </div>
-        <div className="flex flex-col gap-4">
+
+        <div className="flex flex-col gap-3">
           {items.map((item) => (
             <BlurbCard
               key={item.tmdbId}
@@ -70,12 +108,19 @@ export function Recommendations() {
             />
           ))}
         </div>
+
         {items.length === 0 && (
-          <p className="text-zinc-500 text-center mt-12">
-            All caught up — go back to rate more titles!
-          </p>
+          <div className="text-center py-16">
+            <p className="text-zinc-500 text-sm">All caught up.</p>
+            <button
+              onClick={handleRefresh}
+              className="mt-3 text-zinc-400 text-sm underline hover:text-white transition-colors"
+            >
+              Get new recommendations
+            </button>
+          </div>
         )}
-      </div>
+      </main>
     </div>
   );
 }

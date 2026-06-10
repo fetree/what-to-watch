@@ -4,12 +4,69 @@ A personalized movie, TV, and anime recommender. Rate a handful of titles you kn
 
 ## How it works
 
-1. **Onboarding** — Rate 5–20 titles from a curated seed list (1–5 stars)
-2. **Profile extraction** — Claude reads your ratings and writes a structured taste profile (themes, tone, pacing, dark-content tolerance, etc.)
-3. **Embedding** — The taste profile is turned into a vector and stored in Qdrant
-4. **Similarity search** — Qdrant finds the 20 catalog titles whose vectors are closest to your profile
-5. **Re-ranking** — Claude picks the best 8 and writes a personalized "why you'd like this" blurb for each
-6. **Feedback loop** — Hitting ✕ on a recommendation nudges your profile vector away from that title in real time
+### The pipeline
+
+```
+Your ratings
+     │
+     ▼
+ Claude (Sonnet)
+ reads your scores and writes a prose taste profile:
+ "This viewer gravitates toward slow-burn psychological
+  dramas with morally complex characters..."
+     │
+     ▼
+ OpenAI Embeddings
+ converts that paragraph into 1536 numbers (a vector)
+ that capture its meaning geometrically
+     │
+     ▼
+ Qdrant (vector DB)
+ stores your profile vector, then searches the pre-seeded
+ catalog of ~2000 titles for the 20 closest matches
+     │
+     ▼
+ Claude (Sonnet) again
+ re-ranks the 20 candidates to the best 8 and writes
+ a personalized "why you'd like this" blurb for each
+     │
+     ▼
+ Your recommendations
+```
+
+### Why two separate tools?
+
+**Qdrant** is fast but dumb — it does pure math, comparing 1536 numbers against 1536 numbers across thousands of titles in milliseconds. It has no concept of taste or narrative.
+
+**Claude** is slow but smart — it understands nuance, subtext, and why a fan of *Parasite* might love *Oldboy* but hate *Squid Game*. It can't search 2000 titles at once without enormous cost.
+
+The architecture plays to both strengths: Qdrant narrows the field cheaply, Claude explains the match precisely.
+
+### What gets embedded and why
+
+Every catalog title is converted to a text string before embedding:
+
+```
+"The Dark Knight. When the menace known as the Joker wreaks havoc
+on Gotham, Batman must confront his greatest psychological challenge.
+Genres: Action, Crime, Drama, Thriller."
+```
+
+This string is embedded into a vector. Your taste profile — a paragraph Claude writes about your viewing preferences — is embedded the same way. Titles whose embed strings land near your profile vector in 1536-dimensional space are your recommendations.
+
+### Taste drift
+
+Hitting ✕ on a recommendation doesn't just hide it — it calls `POST /api/profile/update`, which blends your existing profile vector slightly away from that title's catalog vector. Rate enough ✕'s on slow period dramas and your profile geometrically drifts toward whatever else you've responded positively to.
+
+### Token cost at a glance
+
+| Operation | Model | Approx tokens |
+|---|---|---|
+| Profile extraction | Sonnet | ~500 in / ~600 out |
+| Re-ranking + blurbs | Sonnet | ~2000 in / ~800 out |
+| Taste drift update | none (math only) | — |
+
+Recommendations are cached in localStorage for 24 hours — refreshing the page never re-triggers a Claude call unless you explicitly hit **Refresh**.
 
 ## Tech stack
 

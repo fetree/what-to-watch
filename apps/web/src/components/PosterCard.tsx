@@ -11,7 +11,7 @@ interface PosterCardProps {
 
 export function PosterCard({ title, score, onRate }: PosterCardProps) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3 bg-zinc-900 border border-zinc-800 rounded-xl p-3">
       <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-zinc-800">
         {title.posterPath ? (
           <img

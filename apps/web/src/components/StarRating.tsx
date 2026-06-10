@@ -5,7 +5,7 @@ interface StarRatingProps {
 
 export function StarRating({ value, onChange }: StarRatingProps) {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-1.5">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}

@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { RecommendationItem } from "@what-to-watch/shared";
 
 const SONNET = "claude-sonnet-4-6";
+const HAIKU = "claude-haiku-4-5-20251001";
 
 interface RatedTitle {
   title: string;
@@ -27,7 +28,7 @@ export function createClaudeService(apiKey: string) {
       .join("\n");
 
     const message = await client.messages.create({
-      model: SONNET,
+      model: HAIKU,
       max_tokens: 800,
       temperature: 0,
       messages: [
@@ -112,7 +113,9 @@ Pick the 8 titles that best match this specific viewer's tastes. Rank them from 
       throw new Error("Claude did not return tool use block");
     }
 
-    const input = toolUse.input as { recommendations: Array<{ tmdbId: number; title: string; mediaType: string; blurb: string }> };
+    const input = toolUse.input as {
+      recommendations: Array<{ tmdbId: number; title: string; mediaType: string; blurb: string }>;
+    };
     return input.recommendations.map((r) => ({
       ...r,
       posterPath: candidates.find((c) => c.tmdbId === r.tmdbId)?.posterPath ?? null,
