@@ -3,7 +3,7 @@ node_modules/
 
 # build output
 dist/
-packages/shared/dist/
+# packages/shared/dist/ is committed so Railway always has compiled JS
 
 # env files
 .env
