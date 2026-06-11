@@ -1,31 +1,48 @@
-import { defineRailway, project, service, postgres, github, template, ref } from "railway/iac";
+import { defineRailway, project, service, postgres, github, image, volume } from "railway/iac";
 
 export default defineRailway(() => {
   // --- Databases & infrastructure ---
 
   const db = postgres("postgres");
 
-  // Qdrant runs as its own service from the Railway template
+  // Persistent volume for Qdrant embeddings
+  const qdrantVolume = volume("qdrant-storage");
+
   const qdrant = service("qdrant", {
-    source: template("qdrant"),
+    source: image("qdrant/qdrant"),
+    deploy: {
+      numReplicas: 1,
+      sleepApplication: true,
+    },
+    variables: {
+      QDRANT__STORAGE__PATH: "/qdrant/storage",
+      QDRANT__LOG_LEVEL: "INFO",
+    },
+    volumeMounts: {
+      [qdrantVolume.address]: {
+        mountPath: "/qdrant/storage",
+      },
+    },
   });
 
   // --- API service ---
 
   const api = service("api", {
     source: github("fetree/what-to-watch"),
-    // Delegates build/deploy config to railway.toml at the repo root
     configFile: "railway.toml",
+    deploy: {
+      numReplicas: 1,
+      sleepApplication: true,
+    },
     variables: {
-      // Injected automatically from the postgres service
       DATABASE_URL: db.env.DATABASE_URL,
-      // Qdrant is reachable internally on its service name
-      QDRANT_URL: `http://qdrant.railway.internal:6333`,
-      // Secrets — set these in the Railway dashboard or via `railway variables set`
+      QDRANT_URL: "http://qdrant.railway.internal:6333",
       ANTHROPIC_API_KEY: { isSealed: true },
       OPENAI_API_KEY: { isSealed: true },
       TMDB_API_KEY: { isSealed: true },
       PORT: "3000",
+      // Prevent Nixpacks from auto-adding --frozen-lockfile
+      NIXPACKS_INSTALL_CMD: "pnpm install",
     },
   });
 
@@ -33,16 +50,18 @@ export default defineRailway(() => {
 
   const web = service("web", {
     source: github("fetree/what-to-watch"),
-    // Delegates build/deploy config to apps/web/railway.toml
     configFile: "apps/web/railway.toml",
+    deploy: {
+      numReplicas: 1,
+      sleepApplication: true,
+    },
     variables: {
-      // Set to the API service's public Railway domain after first deploy
-      // e.g. https://api-production-xxxx.up.railway.app
       VITE_API_URL: { isSealed: false, isOptional: true },
+      NIXPACKS_INSTALL_CMD: "pnpm install",
     },
   });
 
   return project("what-to-watch", {
-    resources: [db, qdrant, api, web],
+    resources: [db, qdrantVolume, qdrant, api, web],
   });
 });
