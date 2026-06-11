@@ -183,25 +183,73 @@ Open [http://localhost:5173](http://localhost:5173).
 
 ## Deploy to Railway
 
-The repo is set up for three Railway services:
+Infrastructure is defined as code in `.railway/railway.ts` using Railway's TypeScript IaC DSL. It provisions all four services in one shot: PostgreSQL, Qdrant, API, and Web.
 
-**API service**
-- Root: `/` (repo root)
-- Build/start: configured in `railway.toml`
-- Environment variables: all five from `.env.example`
-
-**Web service**
-- Root: `/apps/web`
-- Build command: `pnpm install && pnpm build`
-- Publish directory: `dist`
-- Set `VITE_API_URL` to your API service's Railway URL if serving web and API on separate domains
-
-**Qdrant** — add via Railway's Qdrant native template, then wire `QDRANT_URL` into the API service.
-
-**PostgreSQL** — add via Railway's Postgres native template, then wire `DATABASE_URL` into the API service.
-
-After first deploy, run the seed script once against your production database:
+### Prerequisites
 
 ```bash
-TMDB_API_KEY=... OPENAI_API_KEY=... DATABASE_URL=... QDRANT_URL=... pnpm seed
+npm install -g @railway/cli
+railway login
 ```
+
+### 1. Create a Railway project
+
+```bash
+railway init
+```
+
+### 2. Apply the infrastructure
+
+Preview what will be created:
+
+```bash
+railway config plan
+```
+
+Apply it:
+
+```bash
+railway config apply
+```
+
+This provisions:
+- **PostgreSQL** — Railway managed database, `DATABASE_URL` auto-injected into the API
+- **Qdrant** — deployed from the Railway Qdrant template
+- **API service** — built and started per `railway.toml`
+- **Web service** — built and started per `apps/web/railway.toml`
+
+### 3. Set secrets
+
+The three sealed variables need to be set manually (they're intentionally not in the config file):
+
+```bash
+railway variables set ANTHROPIC_API_KEY=your_key --service api
+railway variables set OPENAI_API_KEY=your_key --service api
+railway variables set TMDB_API_KEY=your_key --service api
+```
+
+### 4. Set the web API URL
+
+After the API service deploys, get its public URL and wire it into the web service:
+
+```bash
+railway variables set VITE_API_URL=https://your-api.up.railway.app --service web
+```
+
+### 5. Run the database migration
+
+```bash
+railway run --service api pnpm --filter api exec prisma migrate deploy
+```
+
+### 6. Seed the catalog
+
+Run once — fetches ~2000 titles from TMDB, embeds them, loads into Qdrant and Postgres (~5 minutes):
+
+```bash
+railway run --service api pnpm seed
+```
+
+### Internal networking
+
+The API talks to Qdrant over Railway's private network via `http://qdrant.railway.internal:6333` — no public internet, no egress cost. This is hardcoded in `.railway/railway.ts`.

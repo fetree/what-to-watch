@@ -6,6 +6,5 @@ buildCommand = "pnpm install --frozen-lockfile && pnpm --filter api exec prisma 
 startCommand = "node apps/api/dist/index.js"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
-
-[[services]]
-name = "api"
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3

@@ -1,0 +1,7 @@
+[build]
+builder = "nixpacks"
+buildCommand = "pnpm install --frozen-lockfile && pnpm --filter web build"
+
+[deploy]
+startCommand = "npx serve apps/web/dist -s -l $PORT"
+healthcheckTimeout = 20

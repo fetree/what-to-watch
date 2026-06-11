@@ -9,8 +9,10 @@ import type {
   SeedTitle,
 } from "@what-to-watch/shared";
 
+const API_BASE = import.meta.env.VITE_API_URL ?? "";
+
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(path, {
+  const res = await fetch(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
     ...init,
   });

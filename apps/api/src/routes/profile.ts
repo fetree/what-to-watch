@@ -12,10 +12,7 @@ import {
 } from "../services/qdrant.js";
 import type { Env } from "../config.js";
 
-export default async function profileRoutes(
-  fastify: FastifyInstance,
-  opts: { config: Env },
-) {
+export default async function profileRoutes(fastify: FastifyInstance, opts: { config: Env }) {
   const embeddings = createEmbeddingsClient(opts.config.OPENAI_API_KEY);
   const claude = createClaudeService(opts.config.ANTHROPIC_API_KEY);
 
@@ -28,7 +25,9 @@ export default async function profileRoutes(
 
     const ratings = await fastify.prisma.rating.findMany({ where: { userId } });
     if (ratings.length < 3) {
-      return reply.status(400).send({ error: "Rate at least 3 titles before generating a profile" });
+      return reply
+        .status(400)
+        .send({ error: "Rate at least 3 titles before generating a profile" });
     }
 
     const tasteProfileText = await claude.extractTasteProfile(
@@ -83,9 +82,7 @@ export default async function profileRoutes(
     // Move toward liked titles, away from disliked ones
     const direction = feedback === "like" ? 1 : -1;
     const blendWeight = feedback === "like" ? 0.85 : 0.95;
-    const adjustedTitleVec = direction === -1
-      ? titleVec.map((v) => -v)
-      : titleVec;
+    const adjustedTitleVec = direction === -1 ? titleVec.map((v) => -v) : titleVec;
 
     const newVector = blendVectors(profileVec, adjustedTitleVec, blendWeight);
 
