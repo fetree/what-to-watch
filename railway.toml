@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm install && pnpm --filter shared build && pnpm --filter api exec prisma generate && pnpm --filter api build"
+buildCommand = "pnpm install && pnpm --filter api exec prisma generate && pnpm --filter api build"
 
 [deploy]
 startCommand = "node apps/api/dist/index.js"

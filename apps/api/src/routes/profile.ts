@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { ProfileUpdateRequestSchema } from "@what-to-watch/shared";
+import { ProfileUpdateRequestSchema } from "../schemas.js";
 import { createEmbeddingsClient } from "../services/embeddings.js";
 import { createClaudeService } from "../services/claude.js";
 import {

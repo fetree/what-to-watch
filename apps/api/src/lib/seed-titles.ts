@@ -1,4 +1,4 @@
-import type { SeedTitle } from "@what-to-watch/shared";
+import type { SeedTitle } from "../schemas.js";
 
 // Curated 20-title onboarding list — mix of well-known movies, TV, and anime
 // covering diverse genres so ratings give Claude signal across multiple taste axes

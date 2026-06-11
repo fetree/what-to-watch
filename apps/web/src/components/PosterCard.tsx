@@ -1,5 +1,5 @@
 import { StarRating } from "./StarRating.js";
-import type { SeedTitle } from "@what-to-watch/shared";
+import type { SeedTitle } from "../types.js";
 
 const TMDB_IMAGE_BASE = "https://image.tmdb.org/t/p/w342";
 

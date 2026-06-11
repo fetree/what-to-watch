@@ -1,4 +1,4 @@
-import type { RecommendationItem } from "@what-to-watch/shared";
+import type { RecommendationItem } from "../types.js";
 import { updateProfile } from "../api/client.js";
 import { getUserId } from "../store/user.js";
 

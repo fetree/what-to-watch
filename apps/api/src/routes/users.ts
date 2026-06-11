@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { CreateUserRequestSchema } from "@what-to-watch/shared";
+import { CreateUserRequestSchema } from "../schemas.js";
 
 export default async function userRoutes(fastify: FastifyInstance) {
   fastify.post("/api/users", async (request, reply) => {

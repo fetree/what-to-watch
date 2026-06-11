@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { RecommendationItem } from "@what-to-watch/shared";
+import type { RecommendationItem } from "../schemas.js";
 
 const SONNET = "claude-sonnet-4-6";
 const HAIKU = "claude-haiku-4-5-20251001";

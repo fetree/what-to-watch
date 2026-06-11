@@ -1,4 +1,4 @@
-import type { RecommendationItem } from "@what-to-watch/shared";
+import type { RecommendationItem } from "../types.js";
 
 const CACHE_KEY = "wtw_recommendations";
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours

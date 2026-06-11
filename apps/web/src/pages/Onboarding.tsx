@@ -4,7 +4,7 @@ import { PosterCard } from "../components/PosterCard.js";
 import { Navbar } from "../components/Navbar.js";
 import { createUser, getSeedTitles, saveRating } from "../api/client.js";
 import { getUserId, setUserId, setEmail } from "../store/user.js";
-import type { SeedTitle } from "@what-to-watch/shared";
+import type { SeedTitle } from "../types.js";
 
 export function Onboarding() {
   const navigate = useNavigate();

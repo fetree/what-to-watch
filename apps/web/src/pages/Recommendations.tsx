@@ -9,7 +9,7 @@ import {
   setCachedRecommendations,
   clearCachedRecommendations,
 } from "../store/recommendations.js";
-import type { RecommendationItem } from "@what-to-watch/shared";
+import type { RecommendationItem } from "../types.js";
 
 export function Recommendations() {
   const navigate = useNavigate();

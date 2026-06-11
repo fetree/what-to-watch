@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import { RatingRequestSchema } from "@what-to-watch/shared";
+import { RatingRequestSchema } from "../schemas.js";
 
 export default async function ratingRoutes(fastify: FastifyInstance) {
   fastify.post("/api/ratings", async (request, reply) => {

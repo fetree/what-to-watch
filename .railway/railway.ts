@@ -36,7 +36,7 @@ export default defineRailway(() => {
     },
     variables: {
       DATABASE_URL: db.env.DATABASE_URL,
-      QDRANT_URL: "http://qdrant.railway.internal:6333",
+      QDRANT_URL: "qdrant.railway.internal",
       ANTHROPIC_API_KEY: { isSealed: true },
       OPENAI_API_KEY: { isSealed: true },
       TMDB_API_KEY: { isSealed: true },

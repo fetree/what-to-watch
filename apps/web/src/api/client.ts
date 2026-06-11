@@ -7,7 +7,7 @@ import type {
   ProfileUpdateRequest,
   RecommendationsResponse,
   SeedTitle,
-} from "@what-to-watch/shared";
+} from "../types.js";
 
 const API_BASE = import.meta.env.VITE_API_URL ?? "";
 
