@@ -1,9 +1,9 @@
 [build]
 builder = "nixpacks"
-buildCommand = "pnpm install && pnpm --filter api exec prisma generate && pnpm --filter api build"
+buildCommand = "pnpm install && pnpm --filter api exec prisma generate"
 
 [deploy]
-startCommand = "node apps/api/dist/index.js"
+startCommand = "pnpm --filter api start"
 healthcheckPath = "/health"
 healthcheckTimeout = 30
 restartPolicyType = "on_failure"
