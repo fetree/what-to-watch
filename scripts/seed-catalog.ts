@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
 import { QdrantClient } from "@qdrant/js-client-rest";
 import OpenAI from "openai";
@@ -210,7 +211,7 @@ async function main() {
     // Upsert into Qdrant
     const qdrantPoints = batch.map((t, idx) => {
       const genres = t.genreIds.map((id) => genreMap.get(id) ?? "").filter(Boolean);
-      const pointId = crypto.randomUUID();
+      const pointId = randomUUID();
       return {
         pointId,
         point: {
