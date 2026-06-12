@@ -1,5 +1,9 @@
 import "dotenv/config";
+import { setDefaultResultOrder } from "node:dns";
 import Fastify from "fastify";
+
+// Railway's internal hostnames resolve to IPv6 but services only listen on IPv4
+setDefaultResultOrder("ipv4first");
 import cors from "@fastify/cors";
 import { loadConfig } from "./config.js";
 import prismaPlugin from "./plugins/prisma.js";
