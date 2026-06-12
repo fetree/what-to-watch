@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { ProfileUpdateRequestSchema } from "../schemas.js";
 import { createEmbeddingsClient } from "../services/embeddings.js";
@@ -35,7 +36,7 @@ export default async function profileRoutes(fastify: FastifyInstance, opts: { co
     );
 
     const vector = await embeddings.embedOne(tasteProfileText);
-    const pointId = user.qdrantPointId ?? crypto.randomUUID();
+    const pointId = user.qdrantPointId ?? randomUUID();
 
     await upsertProfilePoint(fastify.qdrant, pointId, vector, userId);
 
