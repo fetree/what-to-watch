@@ -22,7 +22,9 @@ await fastify.register(qdrantPlugin, { qdrantUrl: config.QDRANT_URL });
 
 // Ensure Qdrant collections exist on startup
 fastify.addHook("onReady", async () => {
-  await ensureCollections(fastify.qdrant);
+  ensureCollections(fastify.qdrant).catch((err) => {
+    fastify.log.warn({ err }, "Qdrant collections setup failed — will retry on first request");
+  });
 });
 
 await fastify.register(healthRoutes);

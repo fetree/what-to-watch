@@ -4,20 +4,28 @@ export const CATALOG_COLLECTION = "catalog";
 export const PROFILES_COLLECTION = "profiles";
 export const VECTOR_SIZE = 1536;
 
-export async function ensureCollections(client: QdrantClient) {
-  const existing = await client.getCollections();
-  const names = existing.collections.map((c) => c.name);
+export async function ensureCollections(client: QdrantClient, retries = 5, delayMs = 2000) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const existing = await client.getCollections();
+      const names = existing.collections.map((c) => c.name);
 
-  if (!names.includes(CATALOG_COLLECTION)) {
-    await client.createCollection(CATALOG_COLLECTION, {
-      vectors: { size: VECTOR_SIZE, distance: "Cosine" },
-    });
-  }
+      if (!names.includes(CATALOG_COLLECTION)) {
+        await client.createCollection(CATALOG_COLLECTION, {
+          vectors: { size: VECTOR_SIZE, distance: "Cosine" },
+        });
+      }
 
-  if (!names.includes(PROFILES_COLLECTION)) {
-    await client.createCollection(PROFILES_COLLECTION, {
-      vectors: { size: VECTOR_SIZE, distance: "Cosine" },
-    });
+      if (!names.includes(PROFILES_COLLECTION)) {
+        await client.createCollection(PROFILES_COLLECTION, {
+          vectors: { size: VECTOR_SIZE, distance: "Cosine" },
+        });
+      }
+      return;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, delayMs * attempt));
+    }
   }
 }
 
