@@ -12,7 +12,7 @@ export default defineRailway(() => {
     source: image("qdrant/qdrant"),
     deploy: {
       numReplicas: 1,
-      sleepApplication: true,
+      sleepApplication: false,
     },
     variables: {
       QDRANT__STORAGE__PATH: "/qdrant/storage",
