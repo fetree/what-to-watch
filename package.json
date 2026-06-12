@@ -9,6 +9,12 @@
     "build": "pnpm --filter api build && pnpm --filter web build",
     "seed": "tsx scripts/seed-catalog.ts"
   },
+  "pnpm": {
+    "supportedArchitectures": {
+      "os": ["linux", "darwin"],
+      "cpu": ["x64", "arm64"]
+    }
+  },
   "devDependencies": {
     "railway": "^3.1.1",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
