@@ -61,7 +61,7 @@ Write the taste profile as 3-4 dense paragraphs of flowing prose. Be specific an
       .join("\n\n");
 
     const message = await client.messages.create({
-      model: SONNET,
+      model: HAIKU,
       max_tokens: 2000,
       temperature: 0,
       tools: [
