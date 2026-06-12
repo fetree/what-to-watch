@@ -12,6 +12,6 @@ export default fp(async function qdrantPlugin(
   fastify: FastifyInstance,
   opts: { qdrantUrl: string },
 ) {
-  const client = new QdrantClient({ url: opts.qdrantUrl });
+  const client = new QdrantClient({ url: opts.qdrantUrl, checkCompatibility: false });
   fastify.decorate("qdrant", client);
 });
