@@ -30,7 +30,7 @@ const config = {
 };
 
 const prisma = new PrismaClient();
-const qdrant = new QdrantClient({ url: config.qdrantUrl });
+const qdrant = new QdrantClient({ url: config.qdrantUrl, checkCompatibility: false });
 const openai = new OpenAI({ apiKey: config.openaiApiKey });
 
 async function tmdbFetch<T>(path: string, params: Record<string, string> = {}): Promise<T> {
