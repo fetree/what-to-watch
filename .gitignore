@@ -14,8 +14,7 @@ dist/
 # TypeScript
 *.tsbuildinfo
 
-# Prisma
-apps/api/prisma/migrations/
+# Prisma migrations are committed so Railway can run them
 
 # OS
 .DS_Store
